@@ -13,9 +13,9 @@ public interface ContactInformationRepository extends JpaRepository<Contact, Lon
 
     List<Contact> findAllByEmail(String emailId);
 
-    Contact findByEmail(String email);
+    List<Contact> findByEmail(String email);
 
-    Contact findByPhoneNumber(Long phoneNumber);
+    List<Contact> findByPhoneNumber(Long phoneNumber);
 
     Contact findByEmailAndPhoneNumber(String email, Long phone);
 

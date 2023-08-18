@@ -42,11 +42,10 @@ public class ContactInformationService {
 
     public List<Contact> getContactsByEmail(String email){
         log.info("Received email {} for contact retrieval", email);
-        List<Contact> retrievedContacts;
+        List<Contact> retrievedContacts = new ArrayList<>();
         retrievedContacts = contactInformationRepository.findAllByEmail(email);
-
-        if (retrievedContacts!=null && !retrievedContacts.isEmpty()) return retrievedContacts;
-        return new ArrayList<>();
+        log.info("Retrieved Contacts {}", retrievedContacts);
+        return retrievedContacts;
     }
 
     public Response processContactToCreateResponseBody(List<Contact> contactList) {
@@ -68,21 +67,17 @@ public class ContactInformationService {
                 secondaryContactIds(secondaryIds).
                 primaryContactId(primaryId).build();
 
-        emails.clear();
-        phoneNumbers.clear();
-        secondaryIds.clear();
-
         log.info("Created Response : {}" , response);
 
         return response;
     }
 
     public boolean doesEmailExist(String email) {
-        return contactInformationRepository.findByEmail(email)!= null;
+        return contactInformationRepository.findByEmail(email)!= null && !contactInformationRepository.findByEmail(email).isEmpty();
     }
 
     public boolean doesPhoneNumberExist(Long phone) {
-        return contactInformationRepository.findByPhoneNumber(phone)!= null;
+        return contactInformationRepository.findByPhoneNumber(phone) != null && !contactInformationRepository.findByPhoneNumber(phone).isEmpty();
     }
 
     public Contact getContactWithPrimaryLinkForEmail(String email) {
