@@ -1,5 +1,6 @@
 package com.example.identityreconciliation.models;
 
+import com.example.identityreconciliation.enums.LinkPrecedence;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +22,8 @@ public class Contact {
     private Long phoneNumber;
     private String email;
     private Long linkedId;
-    private String linkPrecedence;
+    @Enumerated(EnumType.ORDINAL)
+    private LinkPrecedence linkPrecedence;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;

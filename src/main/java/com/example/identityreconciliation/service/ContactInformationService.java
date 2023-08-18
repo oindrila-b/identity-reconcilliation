@@ -1,5 +1,6 @@
 package com.example.identityreconciliation.service;
 
+import com.example.identityreconciliation.enums.LinkPrecedence;
 import com.example.identityreconciliation.models.Contact;
 import com.example.identityreconciliation.repository.ContactInformationRepository;
 import com.example.identityreconciliation.response.Response;
@@ -55,10 +56,10 @@ public class ContactInformationService {
         List<Long> secondaryIds = new ArrayList<>();
         Long primaryId = 0L;
         for (Contact c: contactList) {
-            if (c.getLinkPrecedence().equalsIgnoreCase("primary")) primaryId = c.getId();
+            if (c.getLinkPrecedence() == LinkPrecedence.Primary) primaryId = c.getId();
             if (!emails.contains(c.getEmail())) emails.add(c.getEmail());
             if (!phoneNumbers.contains(c.getPhoneNumber())) phoneNumbers.add(c.getPhoneNumber());
-            if (c.getLinkPrecedence().equalsIgnoreCase("secondary")) secondaryIds.add(c.getId());
+            if (c.getLinkPrecedence() == LinkPrecedence.Secondary) secondaryIds.add(c.getId());
         }
 
         response = Response.builder().
@@ -83,7 +84,7 @@ public class ContactInformationService {
     public Contact getContactWithPrimaryLinkForEmail(String email) {
         List<Contact> retrievedList = contactInformationRepository.findAllByEmail(email);
         for (Contact c: retrievedList) {
-            if (c.getLinkPrecedence().equalsIgnoreCase("primary")) return c;
+            if (c.getLinkPrecedence() == LinkPrecedence.Primary) return c;
         }
         return null;
     }
@@ -91,7 +92,10 @@ public class ContactInformationService {
     public Contact getContactWithPrimaryLinkForPhone(Long phoneNumber) {
         List<Contact> retrievedList = contactInformationRepository.findAllByPhoneNumber(phoneNumber);
         for (Contact c: retrievedList) {
-            if (c.getLinkPrecedence().equalsIgnoreCase("primary")) return c;
+            if (c.getLinkPrecedence() == LinkPrecedence.Primary) {
+                log.info("Retrieved Contact {}",c);
+                return c;
+            }
         }
         return null;
     }

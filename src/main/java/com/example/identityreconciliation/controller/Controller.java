@@ -1,5 +1,6 @@
 package com.example.identityreconciliation.controller;
 
+import com.example.identityreconciliation.enums.LinkPrecedence;
 import com.example.identityreconciliation.models.Contact;
 import com.example.identityreconciliation.response.Response;
 import com.example.identityreconciliation.service.ContactInformationService;
@@ -29,68 +30,82 @@ public class Controller {
 
         if (!service.doesPhoneNumberExist(phoneNumber) && !service.doesEmailExist(email)) {
             log.info("Neither phone number nor email exists already in database");
-           Contact contact = Contact.builder()
-                   .email(email)
-                   .phoneNumber(phoneNumber)
-                   .linkPrecedence("primary")
-                   .createdAt(LocalDateTime.now())
-                   .updatedAt(LocalDateTime.now())
-                   .deletedAt(null)
-                   .build();
+            Contact contact = buildContact(email, phoneNumber, LinkPrecedence.Primary, null);
             log.info("Built new contact {}", contact);
-           Long id = service.saveContactInformation(contact);
-           response = Response.builder()
-                   .primaryContactId(id)
-                   .secondaryContactIds(new ArrayList<>())
-                   .emailIds(Arrays.asList(email))
-                   .phoneNumbers(Arrays.asList(phoneNumber))
-                   .build();
-           log.info("Created Response {}" , response);
+            Long id = service.saveContactInformation(contact);
+            response = service.processContactToCreateResponseBody(Arrays.asList(contact));
+            log.info("Created Response {}", response);
         } else if (service.doesEmailExist(email) && !service.doesPhoneNumberExist(phoneNumber)) {
             log.info("Email exists but phone number doesn't exist in database");
             Contact primaryContact = service.getContactWithPrimaryLinkForEmail(email);
-            Contact contact = Contact.builder()
-                    .email(email)
-                    .phoneNumber(phoneNumber)
-                    .linkPrecedence("secondary")
-                    .linkedId(primaryContact.getId())
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
-                    .deletedAt(null)
-                    .build();
+            Contact contact = new Contact();
+            if (primaryContact == null) {
+                contact = buildContact(email, phoneNumber, LinkPrecedence.Primary, null);
+                service.saveContactInformation(contact);
+                log.info("Null");
+            } else {
+                contact = buildContact(email, phoneNumber, LinkPrecedence.Secondary, primaryContact.getId());
+            }
             log.info("Built new contact {}", contact);
             Long id = service.saveContactInformation(contact);
             List<Contact> contactList = service.getContactsByEmail(email);
             response = service.processContactToCreateResponseBody(service.getContactsByEmail(email));
-            log.info("Created Response {}" , response);
+            log.info("Created Response {}", response);
         } else if (!service.doesEmailExist(email) && service.doesPhoneNumberExist(phoneNumber)) {
             log.info("Email doesn't exists but phone number exists in database");
             Contact primaryContact = service.getContactWithPrimaryLinkForPhone(phoneNumber);
-            Contact contact = Contact.builder()
-                    .email(email)
-                    .phoneNumber(phoneNumber)
-                    .linkPrecedence("secondary")
-                    .linkedId(primaryContact.getId())
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
-                    .deletedAt(null)
-                    .build();
+            Contact contact = new Contact();
+            if (primaryContact == null) {
+                contact = buildContact(email, phoneNumber, LinkPrecedence.Primary, null);
+                service.saveContactInformation(contact);
+                log.info("Null");
+            } else {
+                contact = buildContact(email, phoneNumber, LinkPrecedence.Secondary, primaryContact.getId());
+            }
             log.info("Built new contact {}", contact);
             Long id = service.saveContactInformation(contact);
             response = service.processContactToCreateResponseBody(service.getContactsByPhoneNumber(phoneNumber));
-            log.info("Created Response {}" , response);
+            log.info("Created Response {}", response);
         } else {
-            Contact contact  = service.getContactWithEmailAndPhoneNumber(email, phoneNumber);
             log.info("Both email and phoneNumber exist");
-            response = Response.builder()
-                    .phoneNumbers(Arrays.asList(contact.getPhoneNumber()))
-                    .emailIds(Arrays.asList(contact.getEmail()))
-                    .secondaryContactIds(new ArrayList<>())
-                    .primaryContactId(contact.getId())
-                    .build();
-            log.info("Created Response {}" , response);
+
+            Contact emailContact = service.getContactWithPrimaryLinkForEmail(email);
+            Contact phoneContact = service.getContactWithPrimaryLinkForPhone(phoneNumber);
+
+            if (emailContact.equals(phoneContact)) {
+                Contact contact = service.getContactWithEmailAndPhoneNumber(email, phoneNumber);
+                response = Response.builder()
+                        .phoneNumbers(Arrays.asList(contact.getPhoneNumber()))
+                        .emailIds(Arrays.asList(contact.getEmail()))
+                        .secondaryContactIds(new ArrayList<>())
+                        .primaryContactId(contact.getId())
+                        .build();
+            } else {
+                response = Response.builder()
+                        .phoneNumbers(Arrays.asList(emailContact.getPhoneNumber(), phoneContact.getPhoneNumber()))
+                        .emailIds(Arrays.asList(emailContact.getEmail(), phoneContact.getEmail()))
+                        .secondaryContactIds(Arrays.asList(phoneContact.getId()))
+                        .primaryContactId(emailContact.getId())
+                        .build();
+            }
+
+            log.info("Created Response {}", response);
         }
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    private Contact buildContact(String email, Long phoneNumber, LinkPrecedence linkPrecedence, Long linkedId) {
+        Contact contact = Contact.builder()
+                .email(email)
+                .phoneNumber(phoneNumber)
+                .linkPrecedence(linkPrecedence)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .deletedAt(null)
+                .linkedId(linkedId)
+                .build();
+
+        return contact;
     }
 
 }
