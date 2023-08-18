@@ -11,10 +11,12 @@ public interface ContactInformationRepository extends JpaRepository<Contact, Lon
 
     List<Contact> findAllByPhoneNumber(Long phoneNumber);
 
-    List<Contact> findAllByEmailId(String emailId);
+    List<Contact> findAllByEmail(String emailId);
 
-    boolean existByEmail(String email);
+    Contact findByEmail(String email);
 
-    boolean existByPhone(Long phoneNumber);
+    Contact findByPhoneNumber(Long phoneNumber);
+
+    Contact findByEmailAndPhoneNumber(String email, Long phone);
 
 }
