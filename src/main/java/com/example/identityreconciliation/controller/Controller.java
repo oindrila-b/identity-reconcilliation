@@ -25,9 +25,7 @@ public class Controller {
 
     @GetMapping
     public ResponseEntity<Response> identify(@RequestParam String email, @RequestParam Long phoneNumber) {
-
-        Response response = new Response();
-
+        Response response =  new Response();
         if (!service.doesPhoneNumberExist(phoneNumber) && !service.doesEmailExist(email)) {
             log.info("Neither phone number nor email exists already in database");
             Contact contact = buildContact(email, phoneNumber, LinkPrecedence.Primary, null);
@@ -38,27 +36,24 @@ public class Controller {
         } else if (service.doesEmailExist(email) && !service.doesPhoneNumberExist(phoneNumber)) {
             log.info("Email exists but phone number doesn't exist in database");
             Contact primaryContact = service.getContactWithPrimaryLinkForEmail(email);
-            Contact contact = new Contact();
+            Contact contact ;
             if (primaryContact == null) {
                 contact = buildContact(email, phoneNumber, LinkPrecedence.Primary, null);
-                service.saveContactInformation(contact);
-                log.info("Null");
+                log.info("Primary contact is null creating new primary contact");
             } else {
                 contact = buildContact(email, phoneNumber, LinkPrecedence.Secondary, primaryContact.getId());
             }
             log.info("Built new contact {}", contact);
             Long id = service.saveContactInformation(contact);
-            List<Contact> contactList = service.getContactsByEmail(email);
             response = service.processContactToCreateResponseBody(service.getContactsByEmail(email));
             log.info("Created Response {}", response);
         } else if (!service.doesEmailExist(email) && service.doesPhoneNumberExist(phoneNumber)) {
             log.info("Email doesn't exists but phone number exists in database");
             Contact primaryContact = service.getContactWithPrimaryLinkForPhone(phoneNumber);
-            Contact contact = new Contact();
+            Contact contact;
             if (primaryContact == null) {
                 contact = buildContact(email, phoneNumber, LinkPrecedence.Primary, null);
-                service.saveContactInformation(contact);
-                log.info("Null");
+                log.info("Primary contact for phone is null creating new contact");
             } else {
                 contact = buildContact(email, phoneNumber, LinkPrecedence.Secondary, primaryContact.getId());
             }
