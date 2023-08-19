@@ -59,7 +59,11 @@ public class ContactInformationService {
             if (c.getLinkPrecedence() == LinkPrecedence.Primary) primaryId = c.getId();
             if (!emails.contains(c.getEmail())) emails.add(c.getEmail());
             if (!phoneNumbers.contains(c.getPhoneNumber())) phoneNumbers.add(c.getPhoneNumber());
-            if (c.getLinkPrecedence() == LinkPrecedence.Secondary) secondaryIds.add(c.getId());
+            if (c.getLinkPrecedence() == LinkPrecedence.Secondary) {
+                if (!secondaryIds.contains(c.getId())){
+                    secondaryIds.add(c.getId());
+                }
+            }
         }
 
         response = Response.builder().

@@ -63,29 +63,33 @@ public class Controller {
             log.info("Created Response {}", response);
         } else {
             log.info("Both email and phoneNumber exist");
+            List<Contact> emailContacts = service.getContactsByEmail(email);
+            List<Contact> phoneContact = service.getContactsByPhoneNumber(phoneNumber);
 
-            Contact emailContact = service.getContactWithPrimaryLinkForEmail(email);
-            Contact phoneContact = service.getContactWithPrimaryLinkForPhone(phoneNumber);
+            Contact primaryEmailContact = returnPrimaryContactIfExists(emailContacts);
+            Contact primaryPhoneContact = returnPrimaryContactIfExists(phoneContact);
+            log.info("Primary email contact {} ", primaryEmailContact);
+            log.info("Primary phone contact {}", primaryPhoneContact);
 
-            if (emailContact.equals(phoneContact)) {
-                Contact contact = service.getContactWithEmailAndPhoneNumber(email, phoneNumber);
-                response = Response.builder()
-                        .phoneNumbers(Arrays.asList(contact.getPhoneNumber()))
-                        .emailIds(Arrays.asList(contact.getEmail()))
-                        .secondaryContactIds(new ArrayList<>())
-                        .primaryContactId(contact.getId())
+            if (primaryEmailContact!= null && primaryPhoneContact!= null && !primaryEmailContact.equals(primaryPhoneContact)){
+                emailContacts.addAll(phoneContact);
+                List<Long> id = new ArrayList<>();
+                id.add(primaryPhoneContact.getId());
+                log.info("Secondary ids {} ", id);
+                response =  Response.builder()
+                        .primaryContactId(primaryEmailContact.getId())
+                        .secondaryContactIds(id)
+                        .emailIds(Arrays.asList(primaryEmailContact.getEmail(), primaryPhoneContact.getEmail()))
+                        .phoneNumbers(Arrays.asList(primaryEmailContact.getPhoneNumber(), primaryPhoneContact.getPhoneNumber()))
                         .build();
             } else {
-                response = Response.builder()
-                        .phoneNumbers(Arrays.asList(emailContact.getPhoneNumber(), phoneContact.getPhoneNumber()))
-                        .emailIds(Arrays.asList(emailContact.getEmail(), phoneContact.getEmail()))
-                        .secondaryContactIds(Arrays.asList(phoneContact.getId()))
-                        .primaryContactId(emailContact.getId())
-                        .build();
+                emailContacts.addAll(phoneContact);
+                response = service.processContactToCreateResponseBody(emailContacts);
+            }
+
             }
 
             log.info("Created Response {}", response);
-        }
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -101,6 +105,13 @@ public class Controller {
                 .build();
 
         return contact;
+    }
+
+    private Contact returnPrimaryContactIfExists(List<Contact> contacts) {
+        for (Contact contact: contacts) {
+            if (contact.getLinkPrecedence().equals(LinkPrecedence.Primary)) return contact;
+        }
+        return null;
     }
 
 }
