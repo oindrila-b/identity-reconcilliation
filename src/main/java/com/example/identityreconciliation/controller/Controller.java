@@ -4,6 +4,7 @@ import com.example.identityreconciliation.enums.LinkPrecedence;
 import com.example.identityreconciliation.models.Contact;
 import com.example.identityreconciliation.response.Response;
 import com.example.identityreconciliation.service.ContactInformationService;
+import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/identify")
+@RequestMapping(path = "/identify")
 @Slf4j
 public class Controller {
 
@@ -24,8 +25,12 @@ public class Controller {
     private ContactInformationService service;
 
     @GetMapping
-    public ResponseEntity<Response> identify(@RequestParam String email, @RequestParam Long phoneNumber) {
-        Response response =  new Response();
+    public ResponseEntity<Response> identify(@RequestParam @Nullable String email, @RequestParam @Nullable Long phoneNumber) {
+        Response response;
+
+        if (email == null && phoneNumber!= null) response = service.processContactToCreateResponseBody(service.getContactsByPhoneNumber(phoneNumber));
+        if (email != null && phoneNumber== null) response = service.processContactToCreateResponseBody(service.getContactsByEmail(email));
+
         if (!service.doesPhoneNumberExist(phoneNumber) && !service.doesEmailExist(email)) {
             log.info("Neither phone number nor email exists already in database");
             Contact contact = buildContact(email, phoneNumber, LinkPrecedence.Primary, null);

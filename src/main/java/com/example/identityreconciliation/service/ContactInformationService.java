@@ -57,8 +57,17 @@ public class ContactInformationService {
         Long primaryId = 0L;
         for (Contact c: contactList) {
             if (c.getLinkPrecedence() == LinkPrecedence.Primary) primaryId = c.getId();
-            if (!emails.contains(c.getEmail())) emails.add(c.getEmail());
-            if (!phoneNumbers.contains(c.getPhoneNumber())) phoneNumbers.add(c.getPhoneNumber());
+            if (!emails.contains(c.getEmail())) {
+                if (c.getEmail()!=null){
+                    emails.add(c.getEmail());
+                }
+            }
+            if (!phoneNumbers.contains(c.getPhoneNumber()))
+            {
+                if (c.getPhoneNumber()!=null){
+                    phoneNumbers.add(c.getPhoneNumber());
+                }
+            }
             if (c.getLinkPrecedence() == LinkPrecedence.Secondary) {
                 if (!secondaryIds.contains(c.getId())){
                     secondaryIds.add(c.getId());
