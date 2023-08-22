@@ -1,32 +1,24 @@
-version: "3"
-
-services:
-  mysqldb:
-    container_name: mysqldb
-    image: "mysql:8.0.21"
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: identity_reconciliation
-    networks:
-      springboot-mysql-net:
-
-  springboot-restful-webservices:
-    container_name: springboot-restful-webservices
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mysqldb
-    networks:
-      springboot-mysql-net:
-    restart: on-failure
-
-networks:
-  springboot-mysql-net:
-
-
+#version: '3'
+#services:
+#  mysql-db:
+#    image: mysql
+#    container_name: mysqldbhost
+#    restart: always
+#    environment:
+#      MYSQL_DATABASE: identity-reconciliation
+#      MYSQL_ROOT_PASSWORD: root
+#    ports:
+#      - 3306:3306
+#  demo:
+#    build:
+#      context: ./
+#      dockerfile: Dockerfile
+#    image:
+#      identity_docker:latest
+#    restart: on-failure
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - mysql-db
 
 
