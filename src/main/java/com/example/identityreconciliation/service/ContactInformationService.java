@@ -58,9 +58,7 @@ public class ContactInformationService {
         Long primaryId = 0L;
         for (Contact c: contactList) {
             if (c.getLinkPrecedence() == LinkPrecedence.Primary){
-                primaryId = c.getId();
-            }else if(c.getLinkPrecedence() == LinkPrecedence.Secondary)  {
-                primaryId = c.getLinkedId();
+                primaryId = c.getId()==null? c.getLinkedId():c.getId();
             }
             if (!emails.contains(c.getEmail())) {
                 if (c.getEmail()!=null){
