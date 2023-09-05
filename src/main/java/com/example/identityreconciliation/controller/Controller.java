@@ -28,6 +28,9 @@ public class Controller {
     public ResponseEntity<Response> identify(@RequestParam @Nullable String email, @RequestParam @Nullable Long phoneNumber) {
         Response response;
 
+        if(email==null&&phoneNumber==null){
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
         if (email == null && phoneNumber!= null) {
             log.info("Email is null");
             response = service.processContactToCreateResponseBody(service.getContactsByPhoneNumber(phoneNumber));

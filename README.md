@@ -10,8 +10,8 @@ The _**persistence layer of this application_** is a mysql instance created and 
 The backend layer of this application is hosted using [Render](https://render.com/).
 
 # Endpoint for this application :
-
-The endpoint for this application is [here](https://identity-recon-g171.onrender.com/identify)
+Endpoint : https://identity-recon-g171.onrender.com/identify
+The endpoint for this application is [here](https://identity-recon-g171.onrender.com/identify). 
 However to see the full functionality, we need to pass an email and a phoneNumber as a parameter,
 here's an [example](https://identity-recon-g171.onrender.com/identify?&email=oindrila.banerjee@gmail.com&phoneNumber=159357852) of a request with **email : _oindrila.banerjee@gmail.com_** and **phoneNumber : _112233445566_**
 
