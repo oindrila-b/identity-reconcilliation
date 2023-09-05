@@ -28,8 +28,18 @@ public class Controller {
     public ResponseEntity<Response> identify(@RequestParam @Nullable String email, @RequestParam @Nullable Long phoneNumber) {
         Response response;
 
-        if (email == null && phoneNumber!= null) response = service.processContactToCreateResponseBody(service.getContactsByPhoneNumber(phoneNumber));
-        if (email != null && phoneNumber== null) response = service.processContactToCreateResponseBody(service.getContactsByEmail(email));
+        if (email == null && phoneNumber!= null) {
+            log.info("Email is null");
+            response = service.processContactToCreateResponseBody(service.getContactsByPhoneNumber(phoneNumber));
+            log.info("Created Response {}", response);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        if (email != null && phoneNumber== null){
+            log.info("Phone is Null");
+            response = service.processContactToCreateResponseBody(service.getContactsByEmail(email));
+            log.info("Created Response {}", response);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
 
         if (!service.doesPhoneNumberExist(phoneNumber) && !service.doesEmailExist(email)) {
             log.info("Neither phone number nor email exists already in database");
