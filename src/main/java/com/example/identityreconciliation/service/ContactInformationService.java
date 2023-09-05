@@ -131,7 +131,8 @@ public class ContactInformationService {
     }
 
     public Contact buildContact(String email, Long phoneNumber, LinkPrecedence linkPrecedence, Long linkedId) {
-        Contact contact = Contact.builder()
+
+        return Contact.builder()
                 .email(email)
                 .phoneNumber(phoneNumber)
                 .linkPrecedence(linkPrecedence)
@@ -140,8 +141,6 @@ public class ContactInformationService {
                 .deletedAt(null)
                 .linkedId(linkedId)
                 .build();
-
-        return contact;
     }
 
     public List<String> extractEmails(List<Contact> contactList) {
