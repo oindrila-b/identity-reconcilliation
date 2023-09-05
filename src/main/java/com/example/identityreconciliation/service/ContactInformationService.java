@@ -72,7 +72,7 @@ public class ContactInformationService {
                 }
             }
             if (c.getLinkPrecedence() == LinkPrecedence.Secondary) {
-                if (!secondaryIds.contains(c.getId())){
+                if (!secondaryIds.contains(c.getLinkedId()) || !secondaryIds.contains(c.getId())){
                     secondaryIds.add(c.getId());
                 }
             }
