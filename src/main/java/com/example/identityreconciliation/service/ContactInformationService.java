@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,6 +116,48 @@ public class ContactInformationService {
 
     public Contact getContactWithEmailAndPhoneNumber(String email, Long phoneNumber) {
         return contactInformationRepository.findByEmailAndPhoneNumber(email, phoneNumber);
+    }
+
+    public Contact returnPrimaryContactIfExists(List<Contact> contacts) {
+        log.info("Contacts {}", contacts);
+        for (Contact contact: contacts) {
+            if (contact.getLinkPrecedence().equals(LinkPrecedence.Primary)) return contact;
+        }
+        return null;
+    }
+
+    public Contact buildContact(String email, Long phoneNumber, LinkPrecedence linkPrecedence, Long linkedId) {
+        Contact contact = Contact.builder()
+                .email(email)
+                .phoneNumber(phoneNumber)
+                .linkPrecedence(linkPrecedence)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .deletedAt(null)
+                .linkedId(linkedId)
+                .build();
+
+        return contact;
+    }
+
+    public List<String> extractEmails(List<Contact> contactList) {
+        List<String> emailList = new ArrayList<>();
+        for (Contact contact: contactList) {
+            if (!emailList.contains(contact.getEmail())) {
+                emailList.add(contact.getEmail());
+            }
+        }
+        return emailList;
+    }
+
+    public List<Long> extractPhoneNumber(List<Contact> contactList) {
+        List<Long> phoneList = new ArrayList<>();
+        for (Contact contact: contactList) {
+            if (!phoneList.contains(contact.getPhoneNumber())) {
+                phoneList.add(contact.getPhoneNumber());
+            }
+        }
+        return phoneList;
     }
 
 }
