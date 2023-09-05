@@ -44,7 +44,7 @@ public class ContactInformationService {
 
     public List<Contact> getContactsByEmail(String email){
         log.info("Received email {} for contact retrieval", email);
-        List<Contact> retrievedContacts = new ArrayList<>();
+        List<Contact> retrievedContacts;
         retrievedContacts = contactInformationRepository.findAllByEmail(email);
         log.info("Retrieved Contacts {}", retrievedContacts);
         return retrievedContacts;
@@ -57,7 +57,11 @@ public class ContactInformationService {
         List<Long> secondaryIds = new ArrayList<>();
         Long primaryId = 0L;
         for (Contact c: contactList) {
-            if (c.getLinkPrecedence() == LinkPrecedence.Primary) primaryId = c.getId();
+            if (c.getLinkPrecedence() == LinkPrecedence.Primary){
+                primaryId = c.getId();
+            }else if(c.getLinkPrecedence() == LinkPrecedence.Secondary)  {
+                primaryId = c.getLinkedId();
+            }
             if (!emails.contains(c.getEmail())) {
                 if (c.getEmail()!=null){
                     emails.add(c.getEmail());
