@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping(path = "/identify")
@@ -28,7 +29,7 @@ public class Controller {
     public ResponseEntity<Response> identify(@RequestParam @Nullable String email, @RequestParam @Nullable Long phoneNumber) {
         Response response;
 
-        if(email==null&&phoneNumber==null){
+        if(!Objects.nonNull(email) && !Objects.nonNull(phoneNumber)){
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
         if (email == null && phoneNumber!= null) {
@@ -101,15 +102,27 @@ public class Controller {
                         .phoneNumbers(Arrays.asList(primaryEmailContact.getPhoneNumber(), primaryPhoneContact.getPhoneNumber()))
                         .build();
             } else {
-                emailContacts.addAll(phoneContact);
+                if(emailContacts.equals(phoneContact)){
+                    log.info("Email contact and phone contact same");
+                    log.info("All Contacts {}", emailContacts);
+                    response =  Response.builder()
+                            .primaryContactId(emailContacts.get(0).getId())
+                            .secondaryContactIds(Arrays.asList())
+                            .emailIds(service.extractEmails(emailContacts))
+                            .phoneNumbers(service.extractPhoneNumber(emailContacts))
+                            .build();
+                }else{
+                    emailContacts.addAll(phoneContact);
+                    log.info("All Contacts {}", emailContacts);
+                    response =  Response.builder()
+                            .primaryContactId(emailContacts.get(0).getId())
+                            .secondaryContactIds(Arrays.asList(emailContacts.get(1).getId()))
+                            .emailIds(service.extractEmails(emailContacts))
+                            .phoneNumbers(service.extractPhoneNumber(emailContacts))
+                            .build();
+                }
 
-                log.info("All Contacts {}", emailContacts);
-                response =  Response.builder()
-                        .primaryContactId(emailContacts.get(0).getId())
-                        .secondaryContactIds(Arrays.asList(emailContacts.get(1).getId()))
-                        .emailIds(service.extractEmails(emailContacts))
-                        .phoneNumbers(service.extractPhoneNumber(emailContacts))
-                        .build();
+
             }
 
             }

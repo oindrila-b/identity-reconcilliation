@@ -58,7 +58,9 @@ public class ContactInformationService {
         Long primaryId = 0L;
         for (Contact c: contactList) {
             if (c.getLinkPrecedence() == LinkPrecedence.Primary){
-                primaryId = c.getId()==null? c.getLinkedId():c.getId();
+                primaryId = c.getId();
+            }else{
+                primaryId=c.getLinkedId();
             }
             if (!emails.contains(c.getEmail())) {
                 if (c.getEmail()!=null){
@@ -72,7 +74,8 @@ public class ContactInformationService {
                 }
             }
             if (c.getLinkPrecedence() == LinkPrecedence.Secondary) {
-                if (!secondaryIds.contains(c.getLinkedId()) || !secondaryIds.contains(c.getId())){
+                if (!secondaryIds.contains(c.getId())){
+                    log.info("No duplicated found");
                     secondaryIds.add(c.getId());
                 }
             }
